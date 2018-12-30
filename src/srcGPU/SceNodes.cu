@@ -2443,8 +2443,8 @@ void SceNodes::applySceForcesDisc_M() {
 				if (eCellTypeVHost[cellRankTmp1]==pouch && infoVecs.memNodeType1Host[i]==apical1) { 
 		 			for (int j=0 ; j<totalActiveNodes ; j++) {
 						cellRankTmp2=j/maxNodePerCell ; 
-					//	if ( cellRankTmp2>=74 && cellRankTmp2<=76 && infoVecs.memNodeType1Host[i]==apical1) { 
-						if (eCellTypeVHost[cellRankTmp2]==peri && infoVecs.memNodeType1Host[j]==apical1   ) {
+						if ( cellRankTmp2>=74 && cellRankTmp2<=76 && infoVecs.memNodeType1Host[i]==apical1) { 
+				//		if (eCellTypeVHost[cellRankTmp2]==peri && infoVecs.memNodeType1Host[j]==apical1   ) {
 							distP2=pow( infoVecs.nodeLocXHost[i]-infoVecs.nodeLocXHost[j],2)+
 			         	    	   pow( infoVecs.nodeLocYHost[i]-infoVecs.nodeLocYHost[j],2) ;
 							if (distP2<distMinP2   && distP2<maxAdhLen*maxAdhLen) {

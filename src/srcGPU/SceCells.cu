@@ -1556,9 +1556,9 @@ void SceCells::runAllCellLogicsDisc_M(double & dt, double Damp_Coef, double Init
 	}
     computeApicalLoc();  //Ali
     computeBasalLoc();  //Ali
-	//if (curTime<10000) {	
+	if (curTime<15000) {	
 		eCMCellInteraction(cellPolar,subCellPolar,tmpIsInitPhase); 
-//	}
+	}
 	computeCenterPos_M2(); //Ali 
 	computeInternalAvgPos_M(); //Ali // right now internal points represent nucleus
 	//computeNucleusLoc() ;
@@ -1579,9 +1579,9 @@ void SceCells::runAllCellLogicsDisc_M(double & dt, double Damp_Coef, double Init
 	std::cout << "     *** 2 ***" << endl;
 	std::cout.flush();
 	applySceCellDisc_M();
-//	if (curTime<10000) {	
+	if (curTime<15000) {	
 		applyMembContraction() ;  // Ali
-//	}
+	}
 
 	//	applyNucleusEffect() ;
 	//	applyForceInteractionNucleusAsPoint() ; 
