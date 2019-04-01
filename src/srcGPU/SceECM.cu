@@ -410,7 +410,7 @@ EType* peripORexcmAddr= thrust::raw_pointer_cast (
  int numCells = cellsPointerECM->getCellInfoVecs().basalLocX.size() ;
 
 counter ++ ; 
-if (counter>=100 || curTime<(100*dt)) {
+if (counter>=1000000 || curTime<(100*dt)) {
 	counter=0 ; 
 	thrust:: transform (
 		thrust::make_zip_iterator (
