@@ -461,17 +461,19 @@ CalCellForcesOnECM() ;
 energyECM.totalMorseEnergyECMCell = thrust::reduce( morseEnergy.begin(),morseEnergy.begin()+numNodesECM,(double) 0.0, thrust::plus<double>() ); 
 energyECM.totalAdhEnergyECMCell   = thrust::reduce( adhEnergy.begin()  ,adhEnergy.begin()  +numNodesECM,(double) 0.0, thrust::plus<double>() );
 */
-//CalSumForcesOnECM() ;
-//MoveNodesBySumAllForces(dt) ; 
-CalSumOnlyExplicitForcesOnECM() ;
-CalRHS(dt) ;
+CalSumForcesOnECM() ;
+MoveNodesBySumAllForces(dt) ; 
+//comment out to use explicit forces
+//CalSumOnlyExplicitForcesOnECM() ;
+//CalRHS(dt) ;
 
 #ifdef debugModeECM
 	cudaEventRecord(start5, 0);
 	cudaEventSynchronize(start5);
 	cudaEventElapsedTime(&elapsedTime4, start4, start5);
 #endif
-
+//comment out to use explicit method
+/*
 	vector <double> tmpRHSX(numNodesECM); 
 	vector <double> tmpRHSY(numNodesECM); 
 	tmpHostNodeECMLocX.resize(numNodesECM); 
@@ -482,7 +484,7 @@ CalRHS(dt) ;
 	thrust::copy (nodeECMLocX.begin(), nodeECMLocX.begin()+numNodesECM, tmpHostNodeECMLocX.begin()); 
 	thrust::copy (nodeECMLocY.begin(), nodeECMLocY.begin()+numNodesECM, tmpHostNodeECMLocY.begin());
 
-
+*/
 #ifdef debugModeECM
 
 	cout << "max RHSX is " << *max_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;  
@@ -493,8 +495,8 @@ CalRHS(dt) ;
 	cudaEventSynchronize(start6);
 	cudaEventElapsedTime(&elapsedTime5, start5, start6);
 #endif
-
-	EquMotionCoef (dt); 
+// comment outo to use explicit method
+//	EquMotionCoef (dt); 
 
 
 #ifdef debugModeECM
@@ -502,14 +504,14 @@ CalRHS(dt) ;
 	cudaEventSynchronize(start7);
 	cudaEventElapsedTime(&elapsedTime6, start6, start7);
 #endif
-
-
+//comment out to use explicit method
+/*
 tmpHostNodeECMLocX =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSX,indexPrev, indexNext, tmpHostNodeECMLocX); 
 tmpHostNodeECMLocY =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSY,indexPrev,indexNext, tmpHostNodeECMLocY);
     
 thrust::copy (tmpHostNodeECMLocX.begin(), tmpHostNodeECMLocX.begin()+numNodesECM, nodeECMLocX.begin()); 
 thrust::copy (tmpHostNodeECMLocY.begin(), tmpHostNodeECMLocY.begin()+numNodesECM, nodeECMLocY.begin());
-
+*/
 #ifdef debugModeECM
 	cudaEventRecord(start8, 0);
 	cudaEventSynchronize(start8);
