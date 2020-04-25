@@ -1550,9 +1550,9 @@ void SceCells::runAllCellLogicsDisc_M(double & dt, double Damp_Coef, double Init
 	bool subCellPolar= true  ; 
 	
 	if (curTime>500000) {
-		eCMPointerCells->SetIfECMIsRemoved(false) ; 
-		isBasalActinPresent=false ; 
-		nodes->SetApicalAdhPresence(true) ; 
+	//	eCMPointerCells->SetIfECMIsRemoved(false) ; 
+	//	isBasalActinPresent=false ; 
+	//	nodes->SetApicalAdhPresence(true) ; 
 	}
 
  	if (curTime==InitTimeStage) {
