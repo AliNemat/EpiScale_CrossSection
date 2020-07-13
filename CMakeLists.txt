@@ -11,9 +11,9 @@ endif()
 
 # After some performance testing, there is no significant performance difference
 # between compute_20 and compute_30. 
-# Therefore, for compatibility reason, compute 2.0 is used.
+# Therefore, for compatibility reason, compute 3.0 is used.
 # set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -DTHRUST_DEBUG -gencode arch=compute_20,code=sm_20)
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_20,code=compute_20)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_30,code=compute_30)
 
 MESSAGE("NVCC flags are : " ${CUDA_NVCC_FLAGS})
 
@@ -95,7 +95,8 @@ endif()
 # This manual CXX FLAGS setting is required, because the some version of CMAKE would use an unsupported CMAKE_CXX_FLAGS and result in compliation failure.
 # more specifically, -fstack-protector-strong option is not supported by g++ until g++-4.9, but it is enabled by default in CMake 2.8.12
 # however g++-4.9 is not supported by nvcc 5.5
-set(CMAKE_CXX_FLAGS "-g -O2 -lcusparse -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security  -frounding-math")
+#set(CMAKE_CXX_FLAGS "-g -O2 -lcusparse -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security  -frounding-math")
+set(CMAKE_CXX_FLAGS "-g -O2  -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security  -frounding-math")
 MESSAGE("manually resetting g++ flags to : " ${CMAKE_CXX_FLAGS})
 
 #add_subdirectory(${EXT_PROJECTS_DIR}/gtest)

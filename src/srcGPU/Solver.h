@@ -5,7 +5,7 @@
 #include "commonData.h"
 #include <fstream>
 #include <string>
-#include <cusparse_v2.h>
+//#include <cusparse_v2.h>
 class Solver {
 	public :
     vector<double> solve3Diag (const vector <double> & lDiag, 

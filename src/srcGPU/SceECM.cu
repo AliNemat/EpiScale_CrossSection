@@ -387,7 +387,7 @@ std::string cSVFileName = "./ECMFolder/EnergyExport_" + uniqueSymbol + ".CSV";
 
 void SceECM:: ApplyECMConstrain(int currentActiveCellCount, int totalNodeCountForActiveCellsECM, double curTime, double dt, double Damp_CoefCell, bool cellPolar, bool subCellPolar, bool isInitPhase){  
 
-
+        bool implicit_solver_active = false ; 
 	if (eCMRemoved) {
 		PrintECMRemoved(curTime);
 		cout << "ECM is removed" << endl ; 
@@ -461,10 +461,18 @@ CalCellForcesOnECM() ;
 energyECM.totalMorseEnergyECMCell = thrust::reduce( morseEnergy.begin(),morseEnergy.begin()+numNodesECM,(double) 0.0, thrust::plus<double>() ); 
 energyECM.totalAdhEnergyECMCell   = thrust::reduce( adhEnergy.begin()  ,adhEnergy.begin()  +numNodesECM,(double) 0.0, thrust::plus<double>() );
 */
-//CalSumForcesOnECM() ;
-//MoveNodesBySumAllForces(dt) ; 
-CalSumOnlyExplicitForcesOnECM() ;
-CalRHS(dt) ;
+
+if (!implicit_solver_active) {
+// Calculate summation of all forces and move nodes if explicit solver is going to be used
+    CalSumForcesOnECM() ;
+    MoveNodesBySumAllForces(dt) ; 
+}
+
+if (implicit_solver_active) {
+//Calculate right hand side of implicit solver which includes explicit forces
+    CalSumOnlyExplicitForcesOnECM() ;
+    CalRHS(dt) ;
+}
 
 #ifdef debugModeECM
 	cudaEventRecord(start5, 0);
@@ -472,50 +480,55 @@ CalRHS(dt) ;
 	cudaEventElapsedTime(&elapsedTime4, start4, start5);
 #endif
 
-	vector <double> tmpRHSX(numNodesECM); 
-	vector <double> tmpRHSY(numNodesECM); 
-	tmpHostNodeECMLocX.resize(numNodesECM); 
-	tmpHostNodeECMLocY.resize(numNodesECM); 
+//Create tmp CPU vectors for using in implicit solver. Declariation is not acceptable to be inisde the if condition
+    vector <double> tmpRHSX(numNodesECM); 
+    vector <double> tmpRHSY(numNodesECM); 
+    tmpHostNodeECMLocX.resize(numNodesECM); 
+    tmpHostNodeECMLocY.resize(numNodesECM); 
+if (implicit_solver_active) {
+// Copy ECM locations from GPU to CPU if implicit solver is used    
 	
-	thrust::copy (rHSX.begin(), rHSX.begin()+numNodesECM, tmpRHSX.begin()); 
-	thrust::copy (rHSY.begin(), rHSY.begin()+numNodesECM, tmpRHSY.begin()); 
-	thrust::copy (nodeECMLocX.begin(), nodeECMLocX.begin()+numNodesECM, tmpHostNodeECMLocX.begin()); 
-	thrust::copy (nodeECMLocY.begin(), nodeECMLocY.begin()+numNodesECM, tmpHostNodeECMLocY.begin());
-
-
-#ifdef debugModeECM
-
-	cout << "max RHSX is " << *max_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;  
-	cout << "min RHSX is " << *min_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;
-	cout << "max RHSY is " << *max_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ;  
-	cout << "min RHSY is " << *min_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ; 
+    thrust::copy (rHSX.begin(), rHSX.begin()+numNodesECM, tmpRHSX.begin()); 
+    thrust::copy (rHSY.begin(), rHSY.begin()+numNodesECM, tmpRHSY.begin()); 
+    thrust::copy (nodeECMLocX.begin(), nodeECMLocX.begin()+numNodesECM, tmpHostNodeECMLocX.begin()); 
+    thrust::copy (nodeECMLocY.begin(), nodeECMLocY.begin()+numNodesECM, tmpHostNodeECMLocY.begin());
+    //cout << "max RHSX is " << *max_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;  
+    //cout << "min RHSX is " << *min_element(tmpRHSX.begin(), tmpRHSX.begin()+numNodesECM) << endl ;
+    //cout << "max RHSY is " << *max_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ;  
+    //cout << "min RHSY is " << *min_element(tmpRHSY.begin(), tmpRHSY.begin()+numNodesECM) << endl ; 
+}
+    #ifdef debugModeECM
 	cudaEventRecord(start6, 0);
 	cudaEventSynchronize(start6);
 	cudaEventElapsedTime(&elapsedTime5, start5, start6);
-#endif
+    #endif
 
-	EquMotionCoef (dt); 
+if (implicit_solver_active) {
+    // setting up eqaution of motion if implicit solver is used
+    EquMotionCoef (dt); 
+}
 
-
-#ifdef debugModeECM
+    #ifdef debugModeECM
 	cudaEventRecord(start7, 0);
 	cudaEventSynchronize(start7);
 	cudaEventElapsedTime(&elapsedTime6, start6, start7);
-#endif
+    #endif
 
+if (implicit_solver_active) {
+    // Fetch the implicit solver and update ECM location if implicit solver is used
+    tmpHostNodeECMLocX =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSX,indexPrev, indexNext, tmpHostNodeECMLocX); 
+    tmpHostNodeECMLocY =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSY,indexPrev,indexNext, tmpHostNodeECMLocY);
 
-tmpHostNodeECMLocX =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSX,indexPrev, indexNext, tmpHostNodeECMLocX); 
-tmpHostNodeECMLocY =solverPointer->SOR3DiagPeriodic(nodeIsActive,hCoefLd, hCoefD, hCoefUd,tmpRHSY,indexPrev,indexNext, tmpHostNodeECMLocY);
-    
-thrust::copy (tmpHostNodeECMLocX.begin(), tmpHostNodeECMLocX.begin()+numNodesECM, nodeECMLocX.begin()); 
-thrust::copy (tmpHostNodeECMLocY.begin(), tmpHostNodeECMLocY.begin()+numNodesECM, nodeECMLocY.begin());
+    // copy ECM node locations back from CPU to GPU if implicit solver is used    
+    thrust::copy (tmpHostNodeECMLocX.begin(), tmpHostNodeECMLocX.begin()+numNodesECM, nodeECMLocX.begin()); 
+    thrust::copy (tmpHostNodeECMLocY.begin(), tmpHostNodeECMLocY.begin()+numNodesECM, nodeECMLocY.begin());
 
-#ifdef debugModeECM
+}
+    #ifdef debugModeECM
 	cudaEventRecord(start8, 0);
 	cudaEventSynchronize(start8);
 	cudaEventElapsedTime(&elapsedTime7, start7, start8);
-#endif
-
+    #endif
 /* To reduce computational cost
 cout << "total Morse energy for cell-ECM is= "<< energyECM.totalMorseEnergyCellECM << endl ; 
 cout << "total Morse energy for ECM-cell  is= "<< energyECM.totalMorseEnergyECMCell << endl ;

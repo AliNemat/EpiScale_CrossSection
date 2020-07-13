@@ -57,6 +57,9 @@ void initializeSlurmConfig(int argc, char* argv[]) {
 			std::string configFileNameCombined = configFileNameBaseL
 					+ configFileNameM + configFileNameBaseR;
 			parser.updateConfigFile(globalConfigVars, configFileNameCombined);
+		        int myDeviceID =
+				globalConfigVars.getConfigValue("GPUDeviceNumber").toInt();
+		        gpuErrchk(cudaSetDevice(myDeviceID));
 		}
 	}
 	// no input argument. Take default.

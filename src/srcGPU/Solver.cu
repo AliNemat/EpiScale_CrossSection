@@ -2,6 +2,7 @@
 
 using namespace std ; 
 
+/*
 vector<double>  Solver::solve3Diag(const vector <double> & lDiag, const vector <double> & diag, const vector <double> & uDiag,
 				                   const vector <double> & rHS) {
 
@@ -64,7 +65,7 @@ vector<double>  Solver::solve3Diag(const vector <double> & lDiag, const vector <
 	return ans ; 
 
 }
- 
+ */
  vector<double>  Solver::SOR3DiagPeriodic(const vector <bool> & nodeIsActive, const vector <double> & lDiag, const vector <double> & diag, const vector <double> & uDiag,
 	                                      const vector <double> & rHS, 
 										  const vector <int> & prevIndex,
